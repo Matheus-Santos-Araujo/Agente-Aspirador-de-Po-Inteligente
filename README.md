@@ -6,7 +6,7 @@ Detalhes de PEAS
 O agente não tem total ciência do ambiente. Só capta e aspira a sujeira de uma área. Move-se
 aleatoriamente para verificar a existência de sujeira, sem se preocupar com energia perdida.
 São apenas 2 áreas, para N áreas é necessário criar uma proporção dos objetos da tela (para 
-curiosidade) e, para melhor visualização de simualação, novas imagens de fundo (drawings) ou 
+curiosidade) e, para melhor visualização de simulação, novas imagens de fundo (drawings) ou 
 divisão de fundo (patches) feita por cores-contraste. São utilizadas poucas regras e o desen-
 volvimento do ambiente (ficar sujo) é aleatório - Tendo, o agente como única atuação, "negar" 
 a sujeira.
