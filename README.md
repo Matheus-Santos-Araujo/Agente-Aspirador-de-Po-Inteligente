@@ -11,5 +11,10 @@ divisão de fundo (patches) feita por cores-contraste. São utilizadas poucas re
 desenvolvimento do ambiente (ficar sujo) é aleatório - Tendo o agente, como única atuação 
 sobre ele, "negar" a sujeira.
 
-S=>Sujo   E=>Está em    L=>Aspirar    M=>Mover para   1/2=>Áreas A/B
+S=>Sujo;
+E=>Está em;
+L=>Aspirar;
+M=>Mover para;
+1/2=>Áreas A/B;
+
 (S1/\E1->L1/\M2)/\(L1/\E1->M2)/\(S2/\E2->L2/\M1)/\((L2/\E2)->M1)
