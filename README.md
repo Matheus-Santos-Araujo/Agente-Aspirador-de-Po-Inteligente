@@ -1,5 +1,5 @@
 # Agente-reflexivo-simples-Aspirador-de-p-
-Trabalho básico de IA
+Prática de sintaxe NetLogo
 
 Detalhes de PEAS
 
@@ -26,6 +26,7 @@ Alterações de complexidade sugeridas:
 Tornar ambiente completamente observável e definir uma medida de eficiência (performance).
 Tornar ambiente estocástico criando uma chance de Sugar/Limpar não ser 100% eficiente.
 Tornar o ambiente sequencial utilizando métodos de busca para decisões futuras(afeta performance).
+Tornar tamanho e forma variáveis.
 
 Sobre o agente:
 
