@@ -1,78 +1,108 @@
 breed [vacuum cleaner]
-breed [areas area]
+breed [dirties dirty]
+breed [walls wall]
+globals [
+  nextx
+  nexty
+  valid-corx
+  valid-cory
+  usable-area
+]
 to setup
   clear-all
-  import-drawing "areas.jpg"
+  let counter pxmin
+  set valid-corx [ ]
+  set valid-cory [ ]
+  while [counter <= pxmax]
+  [
+    set valid-corx lput counter valid-corx
+    set counter counter + 2
+  ]
+  set counter pymin
+  while [counter <= pymax]
+  [
+    set valid-cory lput counter valid-cory
+    set counter counter + 2
+  ]
+  set usable-area (length valid-corx * length valid-cory)
   set-default-shape vacuum "car"
-  set-default-shape areas "circle"
+  set-default-shape dirties "circle"
+  set-default-shape walls "square"
   reset-ticks
   setup-room
 end
 
 to setup-room
-  setup-areas
+  ask patches [ set pcolor white ]
+  setup-obstacles
+  setup-dirties
   setup-vacuum
 end
 
-to setup-vacuum
-  create-vacuum 1
-  ask vacuum [ set heading 90
-    set color blue
-    set size 6
-    move-to area 0 ]
+to setup-obstacles
+  create-walls 20 * usable-area / 100 [ setxy one-of valid-corx one-of valid-cory
+  set color black
+  while [any? other turtles-here ]
+    [ setxy one-of valid-corx one-of valid-cory ]
+  ]
 end
 
-to setup-areas
-  create-areas 2
-  ask areas [ set color red
-  set size 2 ]
-  ask area 0 [ setxy -7 0 ]
-  ask area 1 [ setxy 7 0 ]
+to setup-vacuum
+  create-vacuum 1 [ setxy one-of valid-corx one-of valid-cory
+  set heading 90
+  set color blue
+  while [any? other walls-here or any? other vacuum-here]
+    [ setxy one-of valid-corx one-of valid-cory ]
+  ]
+end
+
+to setup-dirties
+  create-dirties (dirty-quant / 100) * (80 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
+    set color red
+    while [ any? other turtles-here ]
+    [ setxy one-of valid-corx one-of valid-cory ]
+  ]
 end
 
 to get-dirty
-  if [color] of area 0 = green [
-    ask area 0 [ set color one-of [red green] ]
-  ]
-  if [color] of area 1 = green [
-    ask area 1 [ set color one-of [red green] ]
+  ask vacuum [
+    ask dirties-here [
+      set color green
+      ;can change deterministic behavior
+    ]
   ]
 end
 
 to go
-  ifelse ticks < max-ticks[
-    get-dirty
-    ask vacuum [
-      ifelse (xcor = -7) [
-        ask area 0 [
-          if [color] of area 0 = red [
-            set color green ; cleansed
-          ]
-        ]
-        move-to area 1
-      ]
-      [
-        ask area 1 [
-          if [color] of area 1 = red [
-            set color green ; cleansed
-          ]
-        ]
-        move-to area 0
-      ]
-    ]
-  ]
-  [ stop ]
+  if not any? dirties with [color = red] or ticks = 144000 [stop]
+  move-random
   tick
+end
+
+to go-once
+  move-random
+  tick
+end
+
+to move-random
+  get-dirty
+  ask vacuum [
+    ;rethink
+  ]
+end
+
+to move-smart
+  ; needs implementing
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+746
+547
 -1
 -1
-13.0
+16.0
 1
 10
 1
@@ -93,10 +123,10 @@ ticks
 30.0
 
 BUTTON
-10
-40
-120
-80
+18
+20
+96
+53
 SETUP
 setup
 NIL
@@ -109,29 +139,14 @@ NIL
 NIL
 1
 
-SLIDER
-10
-90
-205
-123
-max-ticks
-max-ticks
-20
-100
-100.0
-1
-1
-NIL
-HORIZONTAL
-
 BUTTON
-125
-40
-205
-80
-go once
+114
+22
+177
+55
+GO
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -141,14 +156,89 @@ NIL
 NIL
 0
 
+SLIDER
+19
+60
+56
+227
+dirty-quant
+dirty-quant
+50
+100
+100.0
+1
+1
+NIL
+VERTICAL
+
+SLIDER
+19
+250
+191
+283
+pxmax
+pxmax
+-12
+14
+14.0
+2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+19
+283
+191
+316
+pxmin
+pxmin
+-14
+12
+-14.0
+2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+19
+329
+191
+362
+pymax
+pymax
+-12
+14
+14.0
+2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+19
+362
+191
+395
+pymin
+pymin
+-14
+12
+-14.0
+2
+1
+NIL
+HORIZONTAL
+
 BUTTON
-10
-135
-205
-185
-STRESS TEST
-go
-T
+111
+68
+201
+101
+go-once
+go-once
+NIL
 1
 T
 OBSERVER
@@ -500,7 +590,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -517,5 +607,5 @@ true
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
 @#$#@#$#@
-1
+0
 @#$#@#$#@
