@@ -10,6 +10,7 @@ globals [
 ]
 to setup
   clear-all
+  set-patch-size 12
   let counter pxmin
   set valid-corx [ ]
   set valid-cory [ ]
@@ -125,11 +126,11 @@ end
 GRAPHICS-WINDOW
 210
 10
-746
-547
+614
+415
 -1
 -1
-16.0
+12.0
 1
 10
 1
@@ -284,14 +285,32 @@ Clear spots/Tick
 Ticks
 Clear spots
 0.0
-100.0
+144000.0
 0.0
-100.0
+255.0
 true
 false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot count dirties with [color = green]"
+
+PLOT
+19
+362
+198
+482
+Dirty clean / total dirty
+Ticks
+Dirty clean
+0.0
+144000.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count dirties with [ color = green ] / (count dirties with [ color = green ] + count dirties with [ color = red ])"
 
 @#$#@#$#@
 ## WHAT IS IT?
