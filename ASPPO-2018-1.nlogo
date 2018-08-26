@@ -2,8 +2,6 @@ breed [vacuum cleaner]
 breed [dirties dirty]
 breed [walls wall]
 globals [
-  nextx
-  nexty
   valid-corx
   valid-cory
   usable-area
