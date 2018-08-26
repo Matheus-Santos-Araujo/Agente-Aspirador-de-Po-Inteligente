@@ -87,7 +87,34 @@ end
 to move-random
   get-dirty
   ask vacuum [
-    ;rethink
+    let max-count 0
+    ifelse member? heading [ 45 135 225 315 ]
+    [
+      while [(any? walls-on patch-ahead 3 or
+        not (member? ([pxcor] of patch-ahead 3) valid-corx
+          and member? ([pycor] of patch-ahead 3) valid-cory))
+        and max-count < 4]
+      [
+        set heading heading + 90
+        set max-count max-count + 1
+      ]
+      if max-count != 4 [
+        move-to patch-ahead 3]
+    ]
+    [
+      while [(any? walls-on patch-ahead 2
+        or not (member? ([pxcor] of patch-ahead 2) valid-corx
+          and member? ([pycor] of patch-ahead 2) valid-cory)
+        and max-count < 4)]
+      [
+        set heading heading + 90
+        set max-count max-count + 1
+      ]
+      if max-count != 4 [
+        move-to patch-ahead 2]
+    ]
+    set max-count 0
+    set heading heading + one-of [ 45 90 ]
   ]
 end
 
@@ -123,10 +150,10 @@ ticks
 30.0
 
 BUTTON
-18
-20
-96
-53
+19
+21
+110
+54
 SETUP
 setup
 NIL
@@ -141,9 +168,9 @@ NIL
 
 BUTTON
 114
-22
-177
-55
+21
+198
+54
 GO
 go
 T
@@ -159,7 +186,7 @@ NIL
 SLIDER
 19
 60
-56
+52
 227
 dirty-quant
 dirty-quant
@@ -178,7 +205,7 @@ SLIDER
 283
 pxmax
 pxmax
--12
+pxmin + 2
 14
 14.0
 2
@@ -194,7 +221,7 @@ SLIDER
 pxmin
 pxmin
 -14
-12
+pxmax - 2
 -14.0
 2
 1
@@ -208,7 +235,7 @@ SLIDER
 362
 pymax
 pymax
--12
+pymin + 2
 14
 14.0
 2
@@ -224,7 +251,7 @@ SLIDER
 pymin
 pymin
 -14
-12
+pymax - 2
 -14.0
 2
 1
@@ -232,10 +259,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-111
-68
-201
-101
+114
+59
+198
+92
 go-once
 go-once
 NIL
