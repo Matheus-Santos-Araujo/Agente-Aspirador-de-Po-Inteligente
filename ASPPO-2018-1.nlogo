@@ -167,10 +167,10 @@ NIL
 1
 
 BUTTON
-114
-21
+57
+58
 198
-54
+91
 GO
 go
 T
@@ -185,9 +185,9 @@ NIL
 
 SLIDER
 19
-60
+58
 52
-227
+230
 dirty-quant
 dirty-quant
 50
@@ -199,10 +199,10 @@ NIL
 VERTICAL
 
 SLIDER
-19
-250
-191
-283
+57
+96
+198
+129
 pxmax
 pxmax
 pxmin + 2
@@ -214,10 +214,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-19
-283
-191
-316
+57
+129
+198
+162
 pxmin
 pxmin
 -14
@@ -229,10 +229,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-19
-329
-191
-362
+57
+164
+198
+197
 pymax
 pymax
 pymin + 2
@@ -244,10 +244,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-19
-362
-191
-395
+57
+197
+198
+230
 pymin
 pymin
 -14
@@ -260,9 +260,9 @@ HORIZONTAL
 
 BUTTON
 114
-59
+21
 198
-92
+54
 go-once
 go-once
 NIL
@@ -274,6 +274,24 @@ NIL
 NIL
 NIL
 0
+
+PLOT
+19
+234
+198
+358
+Clear spots/Tick
+Ticks
+Clear spots
+0.0
+100.0
+0.0
+100.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count dirties with [color = green]"
 
 @#$#@#$#@
 ## WHAT IS IT?
