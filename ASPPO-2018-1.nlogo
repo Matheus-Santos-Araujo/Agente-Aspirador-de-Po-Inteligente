@@ -1,15 +1,25 @@
-breed [vacuum cleaner]
 breed [dirties dirty]
 breed [walls wall]
+breed [vacuum cleaner]
+vacuum-own [
+  percmax-x
+  percmin-x
+  percmax-y
+  percmin-y
+  curposx
+  curposy
+  score
+]
 globals [
+  counter
   valid-corx
   valid-cory
   usable-area
 ]
 to setup
   clear-all
-  set-patch-size 12
-  let counter pxmin
+  set-patch-size 16 * zoom / 100
+  set counter pxmin
   set valid-corx [ ]
   set valid-cory [ ]
   while [counter <= pxmax]
@@ -27,12 +37,13 @@ to setup
   set-default-shape vacuum "car"
   set-default-shape dirties "circle"
   set-default-shape walls "square"
-  reset-ticks
   setup-room
+  ask turtles [set size 2.5]
+  reset-ticks
 end
 
 to setup-room
-  ask patches [ set pcolor white ]
+  ask patches [ set pcolor 9 ]
   setup-obstacles
   setup-dirties
   setup-vacuum
@@ -40,85 +51,148 @@ end
 
 to setup-obstacles
   create-walls 20 * usable-area / 100 [ setxy one-of valid-corx one-of valid-cory
-  set color black
-  while [any? other turtles-here ]
+    set color black
+    while [any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
 end
 
 to setup-vacuum
-  create-vacuum 1 [ setxy one-of valid-corx one-of valid-cory
-  set heading 90
-  set color blue
-  while [any? other walls-here or any? other vacuum-here]
+  create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
+    set heading 90
+    set color blue
+    set percmax-x 0
+    set percmin-x 0
+    set percmax-y 0
+    set percmin-y 0
+    set curposx 0
+    set curposy 0
+    while [any? other walls-here or any? other vacuum-here]
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
 end
 
 to setup-dirties
   create-dirties (dirty-quant / 100) * (80 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
-    set color red
+    set color 5
     while [ any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
 end
 
-to get-dirty
-  ask vacuum [
+to get-dirty [ ? ]
+  ask cleaner ? [
     ask dirties-here [
-      set color green
+      set color 8
       ;can change deterministic behavior
     ]
+    set score score + 1
   ]
 end
 
 to go
-  if not any? dirties with [color = red] or ticks = 144000 [stop]
-  move-random
+  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum [stop]
   tick
-end
-
-to go-once
-  move-random
-  tick
-end
-
-to move-random
-  get-dirty
-  ask vacuum [
-    let max-count 0
-    ifelse member? heading [ 45 135 225 315 ]
-    [
-      while [(any? walls-on patch-ahead 3 or
-        not (member? ([pxcor] of patch-ahead 3) valid-corx
-          and member? ([pycor] of patch-ahead 3) valid-cory))
-        and max-count < 4]
-      [
-        set heading heading + 90
-        set max-count max-count + 1
+  set counter 0
+  while [ counter < quant-cleaners ]
+  [
+    ask cleaner (counter + count walls + count dirties) [
+      ifelse any? dirties-here with [color = 5]
+      [ get-dirty (counter + count walls + count dirties) ]
+      [ ifelse smart-moves = "ligado"
+        [move-smart (counter + count walls + count dirties) ]
+        [move-random (counter + count walls + count dirties) 0]
       ]
-      if max-count != 4 [
-        move-to patch-ahead 3]
+      set counter counter + 1
     ]
-    [
-      while [(any? walls-on patch-ahead 2
-        or not (member? ([pxcor] of patch-ahead 2) valid-corx
-          and member? ([pycor] of patch-ahead 2) valid-cory)
-        and max-count < 4)]
-      [
-        set heading heading + 90
-        set max-count max-count + 1
-      ]
-      if max-count != 4 [
-        move-to patch-ahead 2]
-    ]
-    set max-count 0
-    set heading heading + one-of [ 45 90 ]
   ]
 end
 
-to move-smart
-  ; needs implementing
+to go-once
+  tick
+  set counter 0
+  while [ counter < quant-cleaners ]
+  [
+    ask cleaner (counter + count walls + count dirties) [
+      ifelse any? dirties-here with [color = 5]
+      [ get-dirty (counter + count walls + count dirties) ]
+      [ ifelse smart-moves = "ligado"
+        [move-smart (counter + count walls + count dirties) ]
+        [move-random (counter + count walls + count dirties) 0]
+      ]
+      set counter counter + 1
+    ]
+  ]
+end
+
+to move-random [ ? ?1 ]
+  ask cleaner ? [
+    let max-count 0
+    ifelse member? heading [ 45 315 225 135 ]
+    [
+      while [(any? walls-on patch-ahead 3 or any? vacuum-on patch-ahead 3
+        or not (member? ([pxcor] of patch-ahead 3) valid-corx
+          and member? ([pycor] of patch-ahead 3) valid-cory))
+        and max-count < 4]
+      [
+        set heading heading - 90
+        set max-count max-count + 1
+      ]
+      if max-count != 4 [
+        move-to patch-ahead 3
+        set curposx curposx + round (sin heading / sin 45)
+        set curposy curposy + round (cos heading / sin 45)
+        ifelse curposx > percmax-x
+        [ set percmax-x curposx ]
+        [
+          if curposx < percmin-x
+          [ set percmin-x curposx ]
+        ]
+        ifelse curposy > percmax-y
+        [ set percmax-y curposy ]
+        [
+          if curposy < percmin-y
+          [ set percmin-y curposy ]
+        ]
+      ]
+    ]
+    [
+      while [(any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
+        or not (member? ([pxcor] of patch-ahead 2) valid-corx
+          and member? ([pycor] of patch-ahead 2) valid-cory))
+        and max-count < 4]
+      [
+        set heading heading - 90
+        set max-count max-count + 1
+      ]
+      if max-count != 4 [
+        move-to patch-ahead 2
+        set curposx curposx + round (sin heading)
+        set curposy curposy + round (cos heading)
+        ifelse curposx > percmax-x
+        [ set percmax-x curposx ]
+        [
+          if curposx < percmin-x
+          [ set percmin-x curposx ]
+        ]
+        ifelse curposy > percmax-y
+        [ set percmax-y curposy ]
+        [
+          if curposy < percmin-y
+          [ set percmin-y curposy ]
+        ]
+      ]
+    ]
+    ifelse ?1 = 0
+    [ set heading heading - one-of [45 90 135 180 225 270]]
+    []
+  ]
+end
+
+to move-smart [ ? ]
+  ask cleaner ? [
+    let attempts 0
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -279,18 +353,18 @@ PLOT
 234
 198
 358
-Clear spots/Tick
+Clear spots
 Ticks
 Clear spots
 0.0
 144000.0
 0.0
-255.0
+180.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count dirties with [color = green]"
+"default" 1.0 0 -16777216 true "" "plot count dirties with [color = 8]"
 
 PLOT
 19
@@ -308,7 +382,47 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count dirties with [ color = green ] / (count dirties with [ color = green ] + count dirties with [ color = red ])"
+"default" 1.0 0 -16777216 true "" "plot count dirties with [ color = 8 ] / (count dirties with [ color = 5 ] + count dirties with [ color = 8 ])"
+
+CHOOSER
+373
+415
+511
+460
+smart-moves
+smart-moves
+"desligado" "ligado"
+0
+
+SLIDER
+201
+415
+373
+448
+zoom
+zoom
+25
+75
+75.0
+25
+1
+NIL
+HORIZONTAL
+
+SLIDER
+201
+449
+373
+482
+quant-cleaners
+quant-cleaners
+1
+10
+10.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
