@@ -100,7 +100,7 @@ to go
       ifelse any? dirties-here with [color = 5]
       [ get-dirty (counter + count walls + count dirties) ]
       [ ifelse smart-moves = "ligado"
-        [move-smart (counter + count walls + count dirties) ]
+        [move-smart (counter + count walls + count dirties) 1]
         [move-random (counter + count walls + count dirties) 0]
       ]
       set counter counter + 1
@@ -117,7 +117,7 @@ to go-once
       ifelse any? dirties-here with [color = 5]
       [ get-dirty (counter + count walls + count dirties) ]
       [ ifelse smart-moves = "ligado"
-        [move-smart (counter + count walls + count dirties) ]
+        [move-smart (counter + count walls + count dirties) 1]
         [move-random (counter + count walls + count dirties) 0]
       ]
       set counter counter + 1
@@ -135,7 +135,7 @@ to move-random [ ? ?1 ]
           and member? ([pycor] of patch-ahead 3) valid-cory))
         and max-count < 4]
       [
-        set heading heading - 90
+        set heading heading - 45
         set max-count max-count + 1
       ]
       if max-count != 4 [
@@ -162,7 +162,7 @@ to move-random [ ? ?1 ]
           and member? ([pycor] of patch-ahead 2) valid-cory))
         and max-count < 4]
       [
-        set heading heading - 90
+        set heading heading - 45
         set max-count max-count + 1
       ]
       if max-count != 4 [
@@ -185,13 +185,35 @@ to move-random [ ? ?1 ]
     ]
     ifelse ?1 = 0
     [ set heading heading - one-of [45 90 135 180 225 270]]
-    []
+    [
+      ifelse ?1 = 1 or ?1 > 2
+      [set heading heading - 45]
+      [
+        if ?1 = 2
+        [ set heading heading + 180]
+      ]
+    ]
   ]
 end
 
-to move-smart [ ? ]
+to move-smart [ ? ?1 ]
   ask cleaner ? [
-    let attempts 0
+    let attempts ?1
+    ifelse attempts < 8[
+      ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
+        or not (member? ([pxcor] of patch-ahead 2) valid-corx
+          and member? ([pycor] of patch-ahead 2) valid-cory))
+      [
+        set heading heading - 45
+        set attempts attempts + 1
+      ]
+      [
+        move-random ? attempts
+      ]
+    ]
+    [
+      ;do nothing. it's a trap.
+    ]
   ]
 end
 @#$#@#$#@
@@ -418,7 +440,7 @@ quant-cleaners
 quant-cleaners
 1
 10
-10.0
+1.0
 1
 1
 NIL
