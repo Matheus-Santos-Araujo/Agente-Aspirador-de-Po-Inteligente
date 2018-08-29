@@ -50,11 +50,8 @@ to setup-room
 end
 
 to setup-obstacles
-<<<<<<< HEAD
+
   create-walls round (20 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
-=======
-  create-walls 20 * usable-area / 100 [ setxy one-of valid-corx one-of valid-cory
->>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     set color black
     while [any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
@@ -77,11 +74,7 @@ to setup-vacuum
 end
 
 to setup-dirties
-<<<<<<< HEAD
   create-dirties round ((dirty-quant / 100) * (80 * usable-area / 100)) [ setxy one-of valid-corx one-of valid-cory
-=======
-  create-dirties (dirty-quant / 100) * (80 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
->>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     set color 5
     while [ any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
@@ -107,7 +100,7 @@ to go
     ask cleaner (counter + count walls + count dirties) [
       ifelse any? dirties-here with [color = 5]
       [ get-dirty (counter + count walls + count dirties) ]
-      [ ifelse smart-moves = "ligado"
+      [ ifelse smart-moves?
         [move-smart (counter + count walls + count dirties) 1]
         [move-random (counter + count walls + count dirties) 0]
       ]
@@ -124,7 +117,7 @@ to go-once
     ask cleaner (counter + count walls + count dirties) [
       ifelse any? dirties-here with [color = 5]
       [ get-dirty (counter + count walls + count dirties) ]
-      [ ifelse smart-moves = "ligado"
+      [ ifelse smart-moves?
         [move-smart (counter + count walls + count dirties) 1]
         [move-random (counter + count walls + count dirties) 0]
       ]
@@ -191,27 +184,14 @@ to move-random [ ? ?1 ]
         ]
       ]
     ]
-<<<<<<< HEAD
     if ?1 = 0 [
       set heading heading - one-of [45 90 135 180 225 270]
-=======
-    ifelse ?1 = 0
-    [ set heading heading - one-of [45 90 135 180 225 270]]
-    [
-      ifelse ?1 = 1 or ?1 > 2
-      [set heading heading - 45]
-      [
-        if ?1 = 2
-        [ set heading heading + 180]
-      ]
->>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     ]
   ]
 end
 
 to move-smart [ ? ?1 ]
   ask cleaner ? [
-<<<<<<< HEAD
     ifelse ?1 < 8[
       ifelse member? heading [ 90 180 270 360 0 ] [
         ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
@@ -244,23 +224,6 @@ to move-smart [ ? ?1 ]
     ]
     [
       move-random ? 0
-=======
-    let attempts ?1
-    ifelse attempts < 8[
-      ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
-        or not (member? ([pxcor] of patch-ahead 2) valid-corx
-          and member? ([pycor] of patch-ahead 2) valid-cory))
-      [
-        set heading heading - 45
-        set attempts attempts + 1
-      ]
-      [
-        move-random ? attempts
-      ]
-    ]
-    [
-      ;do nothing. it's a trap.
->>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     ]
   ]
 end
@@ -293,11 +256,11 @@ ticks
 30.0
 
 BUTTON
-19
-21
-110
-54
-SETUP
+13
+10
+201
+65
+NIL
 setup
 NIL
 1
@@ -310,11 +273,11 @@ NIL
 1
 
 BUTTON
-57
-58
-198
-91
-GO
+13
+68
+102
+101
+NIL
 go
 T
 1
@@ -326,87 +289,12 @@ NIL
 NIL
 0
 
-SLIDER
-19
-58
-52
-230
-dirty-quant
-dirty-quant
-50
-100
-100.0
-1
-1
-NIL
-VERTICAL
-
-SLIDER
-57
-96
-198
-129
-pxmax
-pxmax
-pxmin + 2
-14
-14.0
-2
-1
-NIL
-HORIZONTAL
-
-SLIDER
-57
-129
-198
-162
-pxmin
-pxmin
--14
-pxmax - 2
--14.0
-2
-1
-NIL
-HORIZONTAL
-
-SLIDER
-57
-164
-198
-197
-pymax
-pymax
-pymin + 2
-14
-14.0
-2
-1
-NIL
-HORIZONTAL
-
-SLIDER
-57
-197
-198
-230
-pymin
-pymin
--14
-pymax - 2
--14.0
-2
-1
-NIL
-HORIZONTAL
-
 BUTTON
-114
-21
-198
-54
-go-once
+105
+68
+201
+101
+go
 go-once
 NIL
 1
@@ -418,85 +306,121 @@ NIL
 NIL
 0
 
-PLOT
-19
-234
-198
-358
-Clear spots
-Ticks
-Clear spots
-0.0
-144000.0
-0.0
-180.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count dirties with [color = 8]"
-
-PLOT
-19
-362
-198
-482
-Dirty clean / total dirty
-Ticks
-Dirty clean
-0.0
-144000.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count dirties with [ color = 8 ] / (count dirties with [ color = 5 ] + count dirties with [ color = 8 ])"
-
-CHOOSER
-373
-415
-511
-460
-smart-moves
-smart-moves
-"desligado" "ligado"
-<<<<<<< HEAD
-1
-=======
-0
->>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
-
 SLIDER
-201
-415
-373
-448
+13
+105
+50
+255
 zoom
 zoom
 25
-75
+100
 75.0
 25
 1
 NIL
-HORIZONTAL
+VERTICAL
 
 SLIDER
-201
-449
-373
-482
-quant-cleaners
-quant-cleaners
-1
+648
 10
-1.0
-1
+820
+43
+pxmax
+pxmax
+pxmin + 2
+14
+14.0
+2
 1
 NIL
 HORIZONTAL
+
+SLIDER
+648
+42
+820
+75
+pxmin
+pxmin
+-14
+pxmax - 2
+-14.0
+2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+649
+83
+821
+116
+pymax
+pymax
+pymin + 2
+14
+14.0
+2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+649
+116
+821
+149
+pymin
+pymin
+-14
+pxmax - 2
+-14.0
+2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+120
+104
+157
+254
+quant-cleaners
+quant-cleaners
+1
+(0.25 * count walls) - 1
+10.0
+1
+1
+NIL
+VERTICAL
+
+SLIDER
+164
+104
+201
+254
+dirty-quant
+dirty-quant
+60
+100
+100.0
+1
+1
+NIL
+VERTICAL
+
+SWITCH
+7
+278
+163
+311
+smart-moves?
+smart-moves?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
