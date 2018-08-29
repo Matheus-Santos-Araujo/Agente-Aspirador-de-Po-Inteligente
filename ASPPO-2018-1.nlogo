@@ -50,7 +50,11 @@ to setup-room
 end
 
 to setup-obstacles
+<<<<<<< HEAD
   create-walls round (20 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
+=======
+  create-walls 20 * usable-area / 100 [ setxy one-of valid-corx one-of valid-cory
+>>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     set color black
     while [any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
@@ -73,7 +77,11 @@ to setup-vacuum
 end
 
 to setup-dirties
+<<<<<<< HEAD
   create-dirties round ((dirty-quant / 100) * (80 * usable-area / 100)) [ setxy one-of valid-corx one-of valid-cory
+=======
+  create-dirties (dirty-quant / 100) * (80 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
+>>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     set color 5
     while [ any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
@@ -183,14 +191,27 @@ to move-random [ ? ?1 ]
         ]
       ]
     ]
+<<<<<<< HEAD
     if ?1 = 0 [
       set heading heading - one-of [45 90 135 180 225 270]
+=======
+    ifelse ?1 = 0
+    [ set heading heading - one-of [45 90 135 180 225 270]]
+    [
+      ifelse ?1 = 1 or ?1 > 2
+      [set heading heading - 45]
+      [
+        if ?1 = 2
+        [ set heading heading + 180]
+      ]
+>>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     ]
   ]
 end
 
 to move-smart [ ? ?1 ]
   ask cleaner ? [
+<<<<<<< HEAD
     ifelse ?1 < 8[
       ifelse member? heading [ 90 180 270 360 0 ] [
         ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
@@ -223,6 +244,23 @@ to move-smart [ ? ?1 ]
     ]
     [
       move-random ? 0
+=======
+    let attempts ?1
+    ifelse attempts < 8[
+      ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
+        or not (member? ([pxcor] of patch-ahead 2) valid-corx
+          and member? ([pycor] of patch-ahead 2) valid-cory))
+      [
+        set heading heading - 45
+        set attempts attempts + 1
+      ]
+      [
+        move-random ? attempts
+      ]
+    ]
+    [
+      ;do nothing. it's a trap.
+>>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
     ]
   ]
 end
@@ -424,7 +462,11 @@ CHOOSER
 smart-moves
 smart-moves
 "desligado" "ligado"
+<<<<<<< HEAD
 1
+=======
+0
+>>>>>>> b730d270dc42f82bb2f2227d82ccc8955ece50c9
 
 SLIDER
 201
