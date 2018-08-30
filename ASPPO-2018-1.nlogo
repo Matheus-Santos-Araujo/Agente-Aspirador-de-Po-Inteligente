@@ -12,6 +12,7 @@ vacuum-own [
   gave-up-at
 ]
 globals [
+  stress-results
   valid-corx
   valid-cory
   usable-area
@@ -41,6 +42,7 @@ to setup
   setup-room
   ask turtles [set size 2.5]
   reset-ticks
+  set stress-results 0
 end
 
 to setup-room
@@ -51,7 +53,6 @@ to setup-room
 end
 
 to setup-obstacles
-
   create-walls round (20 * usable-area / 100) [ setxy one-of valid-corx one-of valid-cory
     set color black
     while [any? other turtles-here ]
@@ -60,7 +61,7 @@ to setup-obstacles
 end
 
 to setup-vacuum
-  create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
+    create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
     set heading 90
     set color blue
     set percmax-x 0
@@ -82,6 +83,25 @@ to setup-dirties
     while [ any? other turtles-here ]
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
+end
+
+to re-run
+  set-patch-size 16 * zoom / 100
+  let counter 0
+  while [ counter < quant-cleaners ] [ ask cleaner (counter + count walls + count dirties) [
+    setxy (xcor - ( 2 * curposx )) (ycor - ( 2 * curposy ))
+    set heading 90
+    set curposx 0
+    set curposy 0
+    set score 0
+    set gave-up-at 0
+    ]
+    set counter counter + 1
+  ]
+  set unoperating 0
+  ask dirties [ set color 5 ]
+  clear-plot
+  reset-ticks
 end
 
 to get-dirty [ ? ]
@@ -281,11 +301,11 @@ end
 GRAPHICS-WINDOW
 210
 10
-614
-415
+746
+547
 -1
 -1
-12.0
+16.0
 1
 10
 1
@@ -365,16 +385,16 @@ zoom
 zoom
 25
 100
-75.0
+100.0
 25
 1
 NIL
 VERTICAL
 
 SLIDER
-648
+771
 10
-820
+943
 43
 pxmax
 pxmax
@@ -387,9 +407,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-648
+771
 42
-820
+943
 75
 pxmin
 pxmin
@@ -402,9 +422,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-649
+772
 83
-821
+944
 116
 pymax
 pymax
@@ -417,9 +437,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-649
+772
 116
-821
+944
 149
 pymin
 pymin
@@ -468,22 +488,22 @@ SWITCH
 292
 smart-moves?
 smart-moves?
-1
+0
 1
 -1000
 
 PLOT
-635
+758
 153
-835
+958
 303
 Scores
 Ticks
 Clean spots
 0.0
-180.0
+80.0
 0.0
-180.0
+80.0
 true
 false
 "" ""
@@ -500,9 +520,9 @@ PENS
 "9" 1.0 0 -11221820 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 9) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 9)\n]"
 
 MONITOR
-635
+758
 304
-835
+958
 353
 Performance (Cleaner #0)
 [score] of cleaner (count walls + count dirties) / ticks
@@ -512,11 +532,11 @@ Performance (Cleaner #0)
 
 MONITOR
 6
-294
+296
 206
-343
+345
 % Locais sujos restantes
-count dirties with [color = 5] / (count dirties with [color = 5] + count dirties with [color = 8])
+100 * (count dirties with [color = 5] / (count dirties with [color = 5] + count dirties with [color = 8]))
 4
 1
 12
@@ -524,7 +544,7 @@ count dirties with [color = 5] / (count dirties with [color = 5] + count dirties
 SLIDER
 49
 105
-86
+82
 255
 handcap
 handcap
@@ -537,13 +557,41 @@ NIL
 VERTICAL
 
 MONITOR
-635
+758
 354
-835
+958
 403
 Performance (Cleaner #1)
 [score] of cleaner (count walls + count dirties + 1) / ticks
 2
+1
+12
+
+BUTTON
+6
+348
+205
+381
+Re-run
+re-run
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+0
+
+MONITOR
+7
+385
+205
+434
+Stress ticks average
+stress-results
+4
 1
 12
 
@@ -893,6 +941,45 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="STRESSTEST" repetitions="100" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>ifelse stress-results != 0
+[ set stress-results (stress-results + ticks) / 2 ]
+[ set stress-results ticks]
+re-run</final>
+    <metric>ticks</metric>
+    <metric>[score] of vacuum</metric>
+    <enumeratedValueSet variable="pymin">
+      <value value="-14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="quant-cleaners">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pxmin">
+      <value value="-14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pymax">
+      <value value="14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="zoom">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pxmax">
+      <value value="14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="dirty-quant">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="handcap">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="smart-moves?">
+      <value value="true"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
