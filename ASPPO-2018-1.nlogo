@@ -86,6 +86,13 @@ to setup-dirties
 end
 
 to re-run
+  if ticks > 1 [
+    ifelse stress-results != 0
+    [ set stress-results (stress-results + ticks) / 2 ]
+    [ set stress-results ticks]
+  ]
+  reset-ticks
+  clear-plot
   set-patch-size 16 * zoom / 100
   let counter 0
   while [ counter < quant-cleaners ] [ ask cleaner (counter + count walls + count dirties) [
@@ -100,8 +107,6 @@ to re-run
   ]
   set unoperating 0
   ask dirties [ set color 5 ]
-  clear-plot
-  reset-ticks
 end
 
 to get-dirty [ ? ]
@@ -460,7 +465,7 @@ quant-cleaners
 quant-cleaners
 1
 round ((0.25 * count walls) - 1)
-10.0
+9.0
 1
 1
 NIL
@@ -488,7 +493,7 @@ SWITCH
 292
 smart-moves?
 smart-moves?
-0
+1
 1
 -1000
 
@@ -591,7 +596,7 @@ MONITOR
 434
 Stress ticks average
 stress-results
-4
+0
 1
 12
 
@@ -942,15 +947,12 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="STRESSTEST" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="STRESSTEST-RANDOM" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <final>ifelse stress-results != 0
-[ set stress-results (stress-results + ticks) / 2 ]
-[ set stress-results ticks]
-re-run</final>
     <metric>ticks</metric>
-    <metric>[score] of vacuum</metric>
+    <metric>[score] of cleaner (count dirties + count walls)</metric>
+    <metric>100 * (count dirties with [color = 5] / (count dirties with [color = 5] + count dirties with [color = 8]))</metric>
     <enumeratedValueSet variable="pymin">
       <value value="-14"/>
     </enumeratedValueSet>
@@ -976,7 +978,7 @@ re-run</final>
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="smart-moves?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
