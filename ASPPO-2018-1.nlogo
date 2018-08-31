@@ -309,7 +309,7 @@ NIL
 SLIDER
 13
 105
-50
+46
 255
 zoom
 zoom
@@ -384,7 +384,7 @@ HORIZONTAL
 SLIDER
 120
 104
-157
+153
 254
 quant-cleaners
 quant-cleaners
@@ -399,7 +399,7 @@ VERTICAL
 SLIDER
 164
 104
-201
+197
 254
 dirty-quant
 dirty-quant
@@ -418,9 +418,36 @@ SWITCH
 311
 smart-moves?
 smart-moves?
-0
+1
 1
 -1000
+
+PLOT
+643
+167
+843
+317
+Scores
+Ticks
+Clean spots
+0.0
+140.0
+0.0
+180.0
+true
+false
+"" ""
+PENS
+"0" 1.0 0 -16777216 true "" "plot [score] of cleaner (count walls + count dirties)"
+"1" 1.0 0 -7500403 true "" "plot [score] of cleaner ((count walls + count dirties) + 1)"
+"2" 1.0 0 -2674135 true "" "plot [score] of cleaner ((count walls + count dirties) + 2)"
+"3" 1.0 0 -955883 true "" "plot [score] of cleaner ((count walls + count dirties) + 3)"
+"4" 1.0 0 -6459832 true "" "plot [score] of cleaner (count walls + count dirties + 4)"
+"5" 1.0 0 -1184463 true "" "plot [score] of cleaner (count walls + count dirties + 5)"
+"6" 1.0 0 -10899396 true "" "plot [score] of cleaner (count walls + count dirties + 6)"
+"7" 1.0 0 -13840069 true "" "plot [score] of cleaner (count walls + count dirties + 7)"
+"8" 1.0 0 -14835848 true "" "plot [score] of cleaner (count walls + count dirties + 8)"
+"9" 1.0 0 -11221820 true "" "plot [score] of cleaner (count walls + count dirties + 9)"
 
 @#$#@#$#@
 ## WHAT IS IT?
