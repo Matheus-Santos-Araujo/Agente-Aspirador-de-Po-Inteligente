@@ -9,17 +9,18 @@ vacuum-own [
   curposx
   curposy
   score
+  gave-up-at
 ]
 globals [
-  counter
   valid-corx
   valid-cory
   usable-area
+  unoperating
 ]
 to setup
   clear-all
   set-patch-size 16 * zoom / 100
-  set counter pxmin
+  let counter pxmin
   set valid-corx [ ]
   set valid-cory [ ]
   while [counter <= pxmax]
@@ -68,6 +69,8 @@ to setup-vacuum
     set percmin-y 0
     set curposx 0
     set curposy 0
+    set score 0
+    set gave-up-at 0
     while [any? other walls-here or any? other vacuum-here]
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
@@ -92,37 +95,49 @@ to get-dirty [ ? ]
 end
 
 to go
-  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum [stop]
+  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating = quant-cleaners [stop]
   tick
-  set counter 0
+  let counter 0
   while [ counter < quant-cleaners ]
   [
     ask cleaner (counter + count walls + count dirties) [
-      ifelse any? dirties-here with [color = 5]
-      [ get-dirty (counter + count walls + count dirties) ]
-      [ ifelse smart-moves?
-        [move-smart (counter + count walls + count dirties) 1]
-        [move-random (counter + count walls + count dirties) 0]
+      ifelse (2 * score / ticks < 0.5 and ticks >= round(3500 / quant-cleaners))[
+        set gave-up-at ticks
+        set unoperating unoperating + 1
       ]
-      set counter counter + 1
+      [
+        ifelse any? dirties-here with [color = 5]
+        [ get-dirty (counter + count walls + count dirties) ]
+        [ ifelse smart-moves?
+          [move-smart (counter + count walls + count dirties) 1]
+          [move-random (counter + count walls + count dirties) 0]
+        ]
+      ]
     ]
+    set counter counter + 1
   ]
 end
 
 to go-once
   tick
-  set counter 0
+  let counter 0
   while [ counter < quant-cleaners ]
   [
     ask cleaner (counter + count walls + count dirties) [
-      ifelse any? dirties-here with [color = 5]
-      [ get-dirty (counter + count walls + count dirties) ]
-      [ ifelse smart-moves?
-        [move-smart (counter + count walls + count dirties) 1]
-        [move-random (counter + count walls + count dirties) 0]
+      ifelse (2 * score / ticks < 0.5 and ticks >= round(3500 / quant-cleaners))[
+        set gave-up-at ticks
+        set unoperating unoperating + 1
       ]
-      set counter counter + 1
+      [
+        ifelse any? dirties-here with [color = 5]
+        [ get-dirty (counter + count walls + count dirties) ]
+        [ ifelse smart-moves?
+          [move-smart (counter + count walls + count dirties) 1]
+          [move-random (counter + count walls + count dirties) 0]
+        ]
+      ]
     ]
+    set counter counter + 1
   ]
 end
 
@@ -197,7 +212,7 @@ to move-smart [ ? ?1 ]
         ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
           or not (member? ([pxcor] of patch-ahead 2) valid-corx
             and member? ([pycor] of patch-ahead 2) valid-cory))
-        or any? (dirties-on patch-ahead 2) with [color = 8]
+        or any? (dirties-on patch-ahead 2) with [color = 8] or not any? turtles-on patch-ahead 2
         [
           set heading heading - 45
           move-smart ? ?1 + 1
@@ -210,7 +225,7 @@ to move-smart [ ? ?1 ]
         ifelse (any? walls-on patch-ahead 3 or any? vacuum-on patch-ahead 3
           or not (member? ([pxcor] of patch-ahead 3) valid-corx
             and member? ([pycor] of patch-ahead 3) valid-cory))
-        or any? (dirties-on patch-ahead 3) with [color = 8]
+        or any? (dirties-on patch-ahead 3) with [color = 8] or not any? turtles-on patch-ahead 3
         [
           set heading heading - 45
           move-smart ? (?1 + 1)
@@ -225,6 +240,33 @@ to move-smart [ ? ?1 ]
     [
       move-random ? 0
     ]
+  ]
+end
+
+to move-smartA [ ? ?1 ]
+  let counter 0
+  let possibilities [ ]
+  ask cleaner ? [
+    while [ counter < 8 ]
+    [
+      ifelse member? heading [ 90 180 270 360 0 ] [
+        if not (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
+          or not (member? ([pxcor] of patch-ahead 2) valid-corx
+            and member? ([pycor] of patch-ahead 2) valid-cory))
+        [
+          set possibilities lput heading possibilities
+        ]
+      ]
+      [
+        if not (any? walls-on patch-ahead 3 or any? vacuum-on patch-ahead 3
+          or not (member? ([pxcor] of patch-ahead 3) valid-corx
+            and member? ([pycor] of patch-ahead 3) valid-cory))
+        [
+          set possibilities lput heading possibilities
+        ]
+      ]
+    ]
+    set heading heading - 45
   ]
 end
 @#$#@#$#@
@@ -390,7 +432,7 @@ quant-cleaners
 quant-cleaners
 1
 (0.25 * count walls) - 1
-10.0
+3.0
 1
 1
 NIL
@@ -403,9 +445,9 @@ SLIDER
 254
 dirty-quant
 dirty-quant
-60
+33
 100
-100.0
+54.0
 1
 1
 NIL
@@ -418,15 +460,15 @@ SWITCH
 311
 smart-moves?
 smart-moves?
-1
+0
 1
 -1000
 
 PLOT
-643
-167
-843
-317
+635
+153
+835
+303
 Scores
 Ticks
 Clean spots
