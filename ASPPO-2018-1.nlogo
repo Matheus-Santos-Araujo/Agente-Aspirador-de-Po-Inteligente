@@ -95,22 +95,26 @@ to get-dirty [ ? ]
 end
 
 to go
-  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating = quant-cleaners [stop]
+  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating >= quant-cleaners [stop]
   tick
   let counter 0
   while [ counter < quant-cleaners ]
   [
     ask cleaner (counter + count walls + count dirties) [
-      ifelse (2 * score / ticks < 0.5 and ticks >= round(3500 / quant-cleaners))[
-        set gave-up-at ticks
-        set unoperating unoperating + 1
-      ]
-      [
-        ifelse any? dirties-here with [color = 5]
-        [ get-dirty (counter + count walls + count dirties) ]
-        [ ifelse smart-moves?
-          [move-smart (counter + count walls + count dirties) 1]
-          [move-random (counter + count walls + count dirties) 0]
+      if (gave-up-at = 0)[
+        ifelse ((score / ticks < (0.25 * dirty-quant / 100)
+          or (percmax-x - percmin-x) * (percmax-x - percmin-x) / (usable-area / quant-cleaners) < 0.9)
+          and ticks >= round((2 * usable-area) / quant-cleaners) + handcap)[
+          set gave-up-at ticks
+          set unoperating unoperating + 1
+        ]
+        [
+          ifelse any? dirties-here with [color = 5]
+          [ get-dirty (counter + count walls + count dirties) ]
+          [ ifelse smart-moves?
+            [move-smart (counter + count walls + count dirties) 1]
+            [move-random (counter + count walls + count dirties) 0]
+          ]
         ]
       ]
     ]
@@ -124,16 +128,20 @@ to go-once
   while [ counter < quant-cleaners ]
   [
     ask cleaner (counter + count walls + count dirties) [
-      ifelse (2 * score / ticks < 0.5 and ticks >= round(3500 / quant-cleaners))[
-        set gave-up-at ticks
-        set unoperating unoperating + 1
-      ]
-      [
-        ifelse any? dirties-here with [color = 5]
-        [ get-dirty (counter + count walls + count dirties) ]
-        [ ifelse smart-moves?
-          [move-smart (counter + count walls + count dirties) 1]
-          [move-random (counter + count walls + count dirties) 0]
+      if (gave-up-at = 0)[
+        ifelse ((score / ticks < (0.25 * dirty-quant / 100)
+          or (percmax-x - percmin-x) * (percmax-x - percmin-x) / (usable-area / quant-cleaners) < 0.8)
+          and ticks >= round((2 * usable-area) / quant-cleaners) + handcap)[
+          set gave-up-at ticks
+          set unoperating unoperating + 1
+        ]
+        [
+          ifelse any? dirties-here with [color = 5]
+          [ get-dirty (counter + count walls + count dirties) ]
+          [ ifelse smart-moves?
+            [move-smart (counter + count walls + count dirties) 1]
+            [move-random (counter + count walls + count dirties) 0]
+          ]
         ]
       ]
     ]
@@ -336,7 +344,7 @@ BUTTON
 68
 201
 101
-go
+go once
 go-once
 NIL
 1
@@ -424,15 +432,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-120
+128
 104
-153
+161
 254
 quant-cleaners
 quant-cleaners
 1
-(0.25 * count walls) - 1
-3.0
+round ((0.25 * count walls) - 1)
+10.0
 1
 1
 NIL
@@ -447,20 +455,20 @@ dirty-quant
 dirty-quant
 33
 100
-54.0
+100.0
 1
 1
 NIL
 VERTICAL
 
 SWITCH
-7
-278
-163
-311
+26
+259
+182
+292
 smart-moves?
 smart-moves?
-0
+1
 1
 -1000
 
@@ -473,23 +481,71 @@ Scores
 Ticks
 Clean spots
 0.0
-140.0
+180.0
 0.0
 180.0
 true
 false
 "" ""
 PENS
-"0" 1.0 0 -16777216 true "" "plot [score] of cleaner (count walls + count dirties)"
-"1" 1.0 0 -7500403 true "" "plot [score] of cleaner ((count walls + count dirties) + 1)"
-"2" 1.0 0 -2674135 true "" "plot [score] of cleaner ((count walls + count dirties) + 2)"
-"3" 1.0 0 -955883 true "" "plot [score] of cleaner ((count walls + count dirties) + 3)"
-"4" 1.0 0 -6459832 true "" "plot [score] of cleaner (count walls + count dirties + 4)"
-"5" 1.0 0 -1184463 true "" "plot [score] of cleaner (count walls + count dirties + 5)"
-"6" 1.0 0 -10899396 true "" "plot [score] of cleaner (count walls + count dirties + 6)"
-"7" 1.0 0 -13840069 true "" "plot [score] of cleaner (count walls + count dirties + 7)"
-"8" 1.0 0 -14835848 true "" "plot [score] of cleaner (count walls + count dirties + 8)"
-"9" 1.0 0 -11221820 true "" "plot [score] of cleaner (count walls + count dirties + 9)"
+"0" 1.0 0 -16777216 true "" "if [gave-up-at] of cleaner (count walls + count dirties) = 0[\nplot [score] of cleaner (count walls + count dirties)\n]"
+"1" 1.0 0 -7500403 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 1) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 1)\n]"
+"2" 1.0 0 -2674135 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 2) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 2)\n]"
+"3" 1.0 0 -955883 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 3) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 3)\n]"
+"4" 1.0 0 -6459832 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 4) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 4)\n]"
+"5" 1.0 0 -1184463 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 5) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 5)\n]"
+"6" 1.0 0 -10899396 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 6) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 6)\n]"
+"7" 1.0 0 -13840069 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 7) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 7)\n]"
+"8" 1.0 0 -14835848 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 8) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 8)\n]"
+"9" 1.0 0 -11221820 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 9) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 9)\n]"
+
+MONITOR
+635
+304
+835
+353
+Performance (Cleaner #0)
+[score] of cleaner (count walls + count dirties) / ticks
+2
+1
+12
+
+MONITOR
+6
+294
+206
+343
+% Locais sujos restantes
+count dirties with [color = 5] / (count dirties with [color = 5] + count dirties with [color = 8])
+4
+1
+12
+
+SLIDER
+49
+105
+86
+255
+handcap
+handcap
+-100
+100
+0.0
+10
+1
+NIL
+VERTICAL
+
+MONITOR
+635
+354
+835
+403
+Performance (Cleaner #1)
+[score] of cleaner (count walls + count dirties + 1) / ticks
+2
+1
+12
 
 @#$#@#$#@
 ## WHAT IS IT?
