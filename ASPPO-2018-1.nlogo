@@ -88,7 +88,7 @@ end
 to re-run
   if ticks > 1 [
     ifelse stress-results != 0
-    [ set stress-results (stress-results + ticks) / 2 ]
+    [ set stress-results ((stress-results + ticks) / 2) ]
     [ set stress-results ticks]
   ]
   reset-ticks
@@ -465,7 +465,7 @@ quant-cleaners
 quant-cleaners
 1
 round ((0.25 * count walls) - 1)
-9.0
+2.0
 1
 1
 NIL
@@ -555,7 +555,7 @@ handcap
 handcap
 -100
 100
-0.0
+20.0
 10
 1
 NIL
@@ -947,7 +947,7 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="STRESSTEST-RANDOM" repetitions="100" runMetricsEveryStep="false">
+  <experiment name="STRESSTEST-RANDOM" repetitions="1000" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <metric>ticks</metric>
@@ -957,7 +957,7 @@ NetLogo 6.0.4
       <value value="-14"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="quant-cleaners">
-      <value value="9"/>
+      <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="pxmin">
       <value value="-14"/>
@@ -979,6 +979,40 @@ NetLogo 6.0.4
     </enumeratedValueSet>
     <enumeratedValueSet variable="smart-moves?">
       <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="STRESSTEST-SMART" repetitions="1000" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>ticks</metric>
+    <metric>[score] of cleaner (count dirties + count walls)</metric>
+    <metric>100 * (count dirties with [color = 5] / (count dirties with [color = 5] + count dirties with [color = 8]))</metric>
+    <enumeratedValueSet variable="pymin">
+      <value value="-14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="quant-cleaners">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pxmin">
+      <value value="-14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pymax">
+      <value value="14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="zoom">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pxmax">
+      <value value="14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="dirty-quant">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="handcap">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="smart-moves?">
+      <value value="true"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
