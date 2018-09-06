@@ -120,7 +120,11 @@ to get-dirty [ ? ]
 end
 
 to go
-  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating >= quant-cleaners [stop]
+  if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating >= quant-cleaners
+  [show sort [score] of vacuum
+    show sum [score] of vacuum
+    stop
+  ]
   tick
   let counter 0
   while [ counter < quant-cleaners ]
@@ -129,7 +133,7 @@ to go
       if (gave-up-at = 0)[
         ifelse ((score / ticks < (0.25 * dirty-quant / 100)
           or (percmax-x - percmin-x) * (percmax-x - percmin-x) / (usable-area / quant-cleaners) < 0.9)
-          and ticks >= round((2 * usable-area) / quant-cleaners) + handcap)[
+          and ticks >= round((2 * usable-area) / quant-cleaners) + handcap) and not any? dirties-here with [color = 5][
           set gave-up-at ticks
           set unoperating unoperating + 1
         ]
