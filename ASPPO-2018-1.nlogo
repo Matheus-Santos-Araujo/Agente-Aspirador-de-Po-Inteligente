@@ -61,7 +61,7 @@ to setup-obstacles
 end
 
 to setup-vacuum
-    create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
+  create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
     set heading 90
     set color ((who - 1) * 10) + 15
     set percmax-x 0
@@ -133,7 +133,7 @@ to go
     ask cleaner (counter + count walls + count dirties) [
       if (gave-up-at = 0)[
         ifelse ((score / ticks) < (0.25 * dirty-quant / 100))
-          and ticks >= round( (2 * (percmax-x - percmin-x) * (percmax-x - percmin-x)) + handcap) and not any? dirties-here with [color = 5][
+        and ticks >= 3 + round((2 * (percmax-x - percmin-x) * (percmax-y - percmin-y)) + handcap) and not any? dirties-here with [color = 5][
           set gave-up-at ticks
           set unoperating unoperating + 1
         ]
@@ -159,7 +159,7 @@ to go-once
     ask cleaner (counter + count walls + count dirties) [
       if (gave-up-at = 0)[
         ifelse ((score / ticks) < (0.25 * dirty-quant / 100))
-          and ticks >= round( (2 * (percmax-x - percmin-x) * (percmax-x - percmin-x)) + handcap) and not any? dirties-here with [color = 5][
+        and (ticks >= (3 + round((2 * (percmax-x - percmin-x) * (percmax-y - percmin-y)) + handcap))) and not any? dirties-here with [color = 5][
           set gave-up-at ticks
           set unoperating unoperating + 1
         ]
@@ -180,63 +180,43 @@ end
 to move-random [ ? ?1 ]
   ask cleaner ? [
     let max-count 0
-    ifelse member? heading [ 45 315 225 135 ]
+    let extraspc 0
+    if member? heading [ 45 315 225 135 ]
+    [ set extraspc 1 ]
+    while [(any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
+      or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
+        and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
+      and max-count < 4]
     [
-      while [(any? walls-on patch-ahead 3 or any? vacuum-on patch-ahead 3
-        or not (member? ([pxcor] of patch-ahead 3) valid-corx
-          and member? ([pycor] of patch-ahead 3) valid-cory))
-        and max-count < 4]
-      [
-        set heading heading - 45
-        set max-count max-count + 1
-      ]
-      if max-count != 4 [
-        move-to patch-ahead 3
-        set curposx curposx + round (sin heading / sin 45)
-        set curposy curposy + round (cos heading / sin 45)
-        ifelse curposx > percmax-x
-        [ set percmax-x curposx ]
-        [
-          if curposx < percmin-x
-          [ set percmin-x curposx ]
-        ]
-        ifelse curposy > percmax-y
-        [ set percmax-y curposy ]
-        [
-          if curposy < percmin-y
-          [ set percmin-y curposy ]
-        ]
-      ]
+      set heading heading - 45
+      set max-count max-count + 1
     ]
-    [
-      while [(any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
-        or not (member? ([pxcor] of patch-ahead 2) valid-corx
-          and member? ([pycor] of patch-ahead 2) valid-cory))
-        and max-count < 4]
-      [
-        set heading heading - 45
-        set max-count max-count + 1
-      ]
-      if max-count != 4 [
+    if max-count != 4 [
+      ifelse max-count != 4 and member? heading [ 0 90 180 270 360 ][
         move-to patch-ahead 2
         set curposx curposx + round (sin heading)
         set curposy curposy + round (cos heading)
-        ifelse curposx > percmax-x
-        [ set percmax-x curposx ]
-        [
-          if curposx < percmin-x
-          [ set percmin-x curposx ]
-        ]
-        ifelse curposy > percmax-y
-        [ set percmax-y curposy ]
-        [
-          if curposy < percmin-y
-          [ set percmin-y curposy ]
-        ]
       ]
-    ]
-    if ?1 = 0 [
-      set heading heading - one-of [45 90 135 180 225 270]
+      [
+        move-to patch-ahead 3
+        set curposx curposx + round (sin heading / sin 45)
+        set curposy curposy + round (cos heading / sin 45)
+      ]
+      ifelse curposx > percmax-x
+              [ set percmax-x curposx ]
+      [
+        if curposx < percmin-x
+        [ set percmin-x curposx ]
+      ]
+      ifelse curposy > percmax-y
+      [ set percmax-y curposy ]
+      [
+        if curposy < percmin-y
+        [ set percmin-y curposy ]
+      ]
+      if ?1 = 0 [
+        set heading heading - one-of [45 90 135 180 225 270]
+      ]
     ]
   ]
 end
@@ -244,30 +224,20 @@ end
 to move-smart [ ? ?1 ]
   ask cleaner ? [
     ifelse ?1 < 8[
-      ifelse member? heading [ 90 180 270 360 0 ] [
-        ifelse (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
-          or not (member? ([pxcor] of patch-ahead 2) valid-corx
-            and member? ([pycor] of patch-ahead 2) valid-cory))
-        or any? (dirties-on patch-ahead 2) with [color = 8] or not any? turtles-on patch-ahead 2
-        [
-          set heading heading - 45
-          move-smart ? ?1 + 1
-        ]
-        [
-          move-random ? 1
-        ]
+      let extraspc 0
+      if member? heading [ 45 315 225 135 ]
+      [ set extraspc 1 ]
+      ifelse (any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
+        or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
+          and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
+      or any? (dirties-on patch-ahead (2 + extraspc)) with [color = 8] or not any? turtles-on patch-ahead (2 + extraspc)
+      [
+        set heading heading - 45
+        move-smart ? ?1 + 1
       ]
       [
-        ifelse (any? walls-on patch-ahead 3 or any? vacuum-on patch-ahead 3
-          or not (member? ([pxcor] of patch-ahead 3) valid-corx
-            and member? ([pycor] of patch-ahead 3) valid-cory))
-        or any? (dirties-on patch-ahead 3) with [color = 8] or not any? turtles-on patch-ahead 3
-        [
-          set heading heading - 45
-          move-smart ? (?1 + 1)
-        ]
-        [
-          move-random ? 1
+        move-random ? 1
+        if extraspc = 1 [
           ifelse ?1 = 2 [set heading heading + 90]
           [if ?1 = 3 [set heading heading + 180 ]]
         ]
@@ -279,31 +249,61 @@ to move-smart [ ? ?1 ]
   ]
 end
 
-to move-smartA [ ? ?1 ]
+to move-smartA [ ? ?1 ?2 ?3 ]
   let counter 0
   let possibilities [ ]
+  let actual-seq [ ]
   ask cleaner ? [
-    while [ counter < 8 ]
-    [
-      ifelse member? heading [ 90 180 270 360 0 ] [
-        if not (any? walls-on patch-ahead 2 or any? vacuum-on patch-ahead 2
-          or not (member? ([pxcor] of patch-ahead 2) valid-corx
-            and member? ([pycor] of patch-ahead 2) valid-cory))
-        [
-          set possibilities lput heading possibilities
-        ]
-      ]
+    while [ counter < 8 ] [
+      let hipposx curposx
+      let hipposy curposy
+      let extraspc 0
+      if member? heading [ 45 315 225 135 ]
+      [ set extraspc 1 ]
+      if not ((any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
+        or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
+          and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
+        or any? (dirties-on patch-ahead (2 + extraspc)) with [color = 8])
       [
-        if not (any? walls-on patch-ahead 3 or any? vacuum-on patch-ahead 3
-          or not (member? ([pxcor] of patch-ahead 3) valid-corx
-            and member? ([pycor] of patch-ahead 3) valid-cory))
+        set possibilities lput heading possibilities
+        ifelse extraspc = 0 [
+          set hipposx hipposx + round (sin heading)
+          set hipposy hipposy + round (cos heading)
+        ]
         [
-          set possibilities lput heading possibilities
+          set hipposx hipposx + round (sin heading / sin 45)
+          set hipposy hipposy + round (cos heading / sin 45)
+        ]
+        ifelse hipposx > percmax-x
+        [ set percmax-x hipposx ]
+        [
+          if hipposx < percmin-x
+          [ set percmin-x hipposx ]
+        ]
+        ifelse hipposx > percmax-y
+        [ set percmax-y hipposx ]
+        [
+          if hipposx < percmin-y
+          [ set percmin-y hipposx ]
         ]
       ]
-    ]
-    set heading heading - 45
+      set heading heading - 45
+    ] ; verifies 8 neighbors
   ]
+  set counter length possibilities
+  let testnext possibilities
+  let counterB 0
+  while [ counter > 0 ][
+    set heading one-of testnext
+    ifelse member? heading [ 45 135 225 315 ] [ set counterB 3 ]
+    [set counterB 5]
+    let counterA 0
+    while [counterA < counterB]
+    []
+    set testnext remove-item (position heading testnext) testnext
+    set counter counter - 1
+  ]
+  set ?1 actual-seq
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -483,7 +483,7 @@ dirty-quant
 dirty-quant
 33
 100
-100.0
+63.0
 1
 1
 %
@@ -496,7 +496,7 @@ SWITCH
 296
 smart-moves?
 smart-moves?
-1
+0
 1
 -1000
 
