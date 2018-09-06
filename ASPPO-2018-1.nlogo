@@ -496,7 +496,7 @@ SWITCH
 296
 smart-moves?
 smart-moves?
-0
+1
 1
 -1000
 
@@ -532,7 +532,7 @@ MONITOR
 162
 818
 211
-Best Cleaner
+"Best" Cleaner
 ([score] of item (quant-cleaners - 1) (sort-on [score] vacuum)) / ticks
 2
 1
@@ -569,7 +569,7 @@ MONITOR
 212
 818
 261
-2nd Best Cleaner
+2nd "Best" Cleaner
 ([score] of item (quant-cleaners - 2) (sort-on [score] vacuum)) / ticks
 2
 1
