@@ -91,6 +91,7 @@ to re-run
     [ set stress-results ((stress-results + ticks) / 2) ]
     [ set stress-results ticks]
   ]
+  reset-perspective
   reset-ticks
   clear-plot
   set-patch-size 16 * zoom / 100
@@ -121,8 +122,8 @@ end
 
 to go
   if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating >= quant-cleaners
-  [show sort [score] of vacuum
-    show sum [score] of vacuum
+  [
+    watch item (quant-cleaners - 1) (sort-on [score] vacuum)
     stop
   ]
   tick
@@ -131,9 +132,8 @@ to go
   [
     ask cleaner (counter + count walls + count dirties) [
       if (gave-up-at = 0)[
-        ifelse ((score / ticks < (0.25 * dirty-quant / 100)
-          or (percmax-x - percmin-x) * (percmax-x - percmin-x) / (usable-area / quant-cleaners) < 0.9)
-          and ticks >= round((2 * usable-area) / quant-cleaners) + handcap) and not any? dirties-here with [color = 5][
+        ifelse ((score / ticks) < (0.25 * dirty-quant / 100))
+          and ticks >= round( (2 * (percmax-x - percmin-x) * (percmax-x - percmin-x)) + handcap) and not any? dirties-here with [color = 5][
           set gave-up-at ticks
           set unoperating unoperating + 1
         ]
@@ -158,9 +158,8 @@ to go-once
   [
     ask cleaner (counter + count walls + count dirties) [
       if (gave-up-at = 0)[
-        ifelse ((score / ticks < (0.25 * dirty-quant / 100)
-          or (percmax-x - percmin-x) * (percmax-x - percmin-x) / (usable-area / quant-cleaners) < 0.8)
-          and ticks >= round((2 * usable-area) / quant-cleaners) + handcap)[
+        ifelse ((score / ticks) < (0.25 * dirty-quant / 100))
+          and ticks >= round( (2 * (percmax-x - percmin-x) * (percmax-x - percmin-x)) + handcap) and not any? dirties-here with [color = 5][
           set gave-up-at ticks
           set unoperating unoperating + 1
         ]
@@ -310,11 +309,11 @@ end
 GRAPHICS-WINDOW
 210
 10
-746
-547
+614
+415
 -1
 -1
-16.0
+12.0
 1
 10
 1
@@ -353,9 +352,9 @@ NIL
 
 BUTTON
 13
-68
-102
-101
+67
+78
+100
 NIL
 go
 T
@@ -369,10 +368,10 @@ NIL
 0
 
 BUTTON
-105
-68
-201
-101
+145
+67
+200
+100
 go once
 go-once
 NIL
@@ -386,25 +385,25 @@ NIL
 0
 
 SLIDER
-13
-105
-46
-255
+14
+103
+47
+263
 zoom
 zoom
 25
-100
-100.0
+75
+75.0
 25
 1
-NIL
+%
 VERTICAL
 
 SLIDER
-771
-10
-943
-43
+15
+296
+187
+329
 pxmax
 pxmax
 pxmin + 2
@@ -416,10 +415,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-771
-42
-943
-75
+15
+328
+187
+361
 pxmin
 pxmin
 -14
@@ -431,10 +430,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-772
-83
-944
-116
+15
+361
+187
+394
 pymax
 pymax
 pymin + 2
@@ -446,10 +445,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-772
-116
-944
-149
+15
+394
+187
+427
 pymin
 pymin
 -14
@@ -461,10 +460,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-128
-104
-161
-254
+129
+102
+162
+263
 quant-cleaners
 quant-cleaners
 1
@@ -472,14 +471,14 @@ round ((0.25 * count walls) - 1)
 10.0
 1
 1
-NIL
+cleaner(s)
 VERTICAL
 
 SLIDER
-164
-104
-197
-254
+165
+102
+198
+263
 dirty-quant
 dirty-quant
 33
@@ -487,25 +486,25 @@ dirty-quant
 100.0
 1
 1
-NIL
+%
 VERTICAL
 
 SWITCH
-26
-259
-182
-292
+25
+263
+181
+296
 smart-moves?
 smart-moves?
-0
+1
 1
 -1000
 
 PLOT
-758
-153
-958
-303
+618
+10
+818
+160
 Scores
 Ticks
 Clean spots
@@ -529,21 +528,21 @@ PENS
 "9" 1.0 0 -13345367 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 9) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 9)\n]"
 
 MONITOR
-758
-304
-958
-353
-Performance (Cleaner #0)
-[score] of cleaner (count walls + count dirties) / ticks
+618
+162
+818
+211
+Best Cleaner
+([score] of item (quant-cleaners - 1) (sort-on [score] vacuum)) / ticks
 2
 1
 12
 
 MONITOR
-6
-296
-206
-345
+618
+262
+818
+311
 % Locais sujos restantes
 100 * (count dirties with [color = 5] / (count dirties with [color = 5] + count dirties with [color = 8]))
 4
@@ -551,36 +550,36 @@ MONITOR
 12
 
 SLIDER
-49
-105
-82
-255
+47
+103
+80
+263
 handcap
 handcap
 -100
 100
-20.0
+0.0
 10
 1
-NIL
+ticks
 VERTICAL
 
 MONITOR
-758
-354
-958
-403
-Performance (Cleaner #1)
-[score] of cleaner (count walls + count dirties + 1) / ticks
+618
+212
+818
+261
+2nd Best Cleaner
+([score] of item (quant-cleaners - 2) (sort-on [score] vacuum)) / ticks
 2
 1
 12
 
 BUTTON
-6
-348
-205
-381
+79
+67
+144
+100
 Re-run
 re-run
 NIL
@@ -594,15 +593,26 @@ NIL
 0
 
 MONITOR
-7
-385
-205
-434
+618
+360
+818
+409
 Stress ticks average
 stress-results
 0
 1
 12
+
+MONITOR
+618
+313
+818
+358
+Locais limpos
+sum [score] of vacuum
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
