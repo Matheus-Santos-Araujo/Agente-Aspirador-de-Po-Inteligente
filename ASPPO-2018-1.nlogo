@@ -468,7 +468,7 @@ quant-cleaners
 quant-cleaners
 1
 round ((0.25 * count walls) - 1)
-10.0
+5.0
 1
 1
 cleaner(s)
@@ -496,7 +496,7 @@ SWITCH
 296
 smart-moves?
 smart-moves?
-1
+0
 1
 -1000
 
@@ -617,35 +617,41 @@ sum [score] of vacuum
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+Esse modelo busca introduzir conceitos básicos da sintaxe de NetLogo, agentes de resolução de problemas e agentes inteligentes.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+The agent has its set of movement styles chosen by the user, in order to look for the best approach to clean the ambient it is located at.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+O modelo possui diversas variáveis. As mais importantes são:
+
+dirty-quant - Quantidade de sujeira na quantidade restante não ocupada por obstáculos.
+quant-cleaners - Quantidade de aspiradores. (Máx. = em relação a área total usável.
+smart-moves? - Define o tipo de movimentação. Inicialmente duas sendo uma especial.
+handcap - Uma quantidade esperada de ticks a mais para completar a limpeza.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+Alterar algumas variáveis durante o experimento ou antes de usar re-run pode causar alguns erros.
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Você pode verificar como a pontuação de um agente e o comportamento de seu escalonamento mudam drasticamente alterando no meio de um experimento o switch de smart-moves?
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+Você pode alterar o comportamento determinístico do ambiente empregando possibilidades do aspirador conseguir ou não aspirar completamente e definindo a porcentagem restante de sujeira naquela área após a ação de limpar. Seria necessário nesse caso fazer uma alteração na medida de performance para que refletisse o comportamento do ambiente.
 
 ## NETLOGO FEATURES
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+Utilizamos um ambiente discreto e finito no modelo. A movimentação é feita utilizando pontos com cordenadas bem definidas, usando comando move-to juntamente com as variáveis heading e patch-ahead. Note que patch-ahead terá o número de patches a frente definido por qual tipo de movimento será feito (diagonal ou horizontal/vertical). Esses conceitos são fundamentais para o reconhecimento do ambiente.
 
 ## RELATED MODELS
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+A even more sophisticated vacuum cleaner also with discrete and deterministic behavior.
+https://github.com/rsrgn/vacuum-cleaner-netlogo
 
 ## CREDITS AND REFERENCES
 
