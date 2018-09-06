@@ -63,7 +63,7 @@ end
 to setup-vacuum
     create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
     set heading 90
-    set color blue
+    set color ((who - 1) * 10) + 15
     set percmax-x 0
     set percmin-x 0
     set percmax-y 0
@@ -465,7 +465,7 @@ quant-cleaners
 quant-cleaners
 1
 round ((0.25 * count walls) - 1)
-2.0
+10.0
 1
 1
 NIL
@@ -493,7 +493,7 @@ SWITCH
 292
 smart-moves?
 smart-moves?
-1
+0
 1
 -1000
 
@@ -513,16 +513,16 @@ true
 false
 "" ""
 PENS
-"0" 1.0 0 -16777216 true "" "if [gave-up-at] of cleaner (count walls + count dirties) = 0[\nplot [score] of cleaner (count walls + count dirties)\n]"
-"1" 1.0 0 -7500403 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 1) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 1)\n]"
-"2" 1.0 0 -2674135 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 2) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 2)\n]"
-"3" 1.0 0 -955883 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 3) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 3)\n]"
-"4" 1.0 0 -6459832 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 4) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 4)\n]"
-"5" 1.0 0 -1184463 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 5) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 5)\n]"
-"6" 1.0 0 -10899396 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 6) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 6)\n]"
-"7" 1.0 0 -13840069 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 7) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 7)\n]"
-"8" 1.0 0 -14835848 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 8) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 8)\n]"
-"9" 1.0 0 -11221820 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 9) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 9)\n]"
+"0" 1.0 0 -2674135 true "" "if [gave-up-at] of cleaner (count walls + count dirties) = 0[\nplot [score] of cleaner (count walls + count dirties)\n]"
+"1" 1.0 0 -955883 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 1) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 1)\n]"
+"2" 1.0 0 -6459832 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 2) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 2)\n]"
+"3" 1.0 0 -1184463 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 3) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 3)\n]"
+"4" 1.0 0 -10899396 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 4) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 4)\n]"
+"5" 1.0 0 -13840069 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 5) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 5)\n]"
+"6" 1.0 0 -14835848 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 6) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 6)\n]"
+"7" 1.0 0 -11221820 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 7) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 7)\n]"
+"8" 1.0 0 -13791810 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 8) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 8)\n]"
+"9" 1.0 0 -13345367 true "" "if [gave-up-at] of cleaner (count walls + count dirties + 9) = 0[\nplot [score] of cleaner ((count walls + count dirties) + 9)\n]"
 
 MONITOR
 758
