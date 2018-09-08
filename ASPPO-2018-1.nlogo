@@ -249,10 +249,12 @@ to move-smart [ ? ?1 ]
   ]
 end
 
-to move-smartA [ ? ?1 ?2 ?3 ]
+
+
+to move-smartA [ ? ?1 ]
   let counter 0
   let possibilities [ ]
-  let actual-seq [ ]
+
   ask cleaner ? [
     while [ counter < 8 ] [
       let hipposx curposx
@@ -260,10 +262,9 @@ to move-smartA [ ? ?1 ?2 ?3 ]
       let extraspc 0
       if member? heading [ 45 315 225 135 ]
       [ set extraspc 1 ]
-      if not ((any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
+      if not (any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
         or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
           and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
-        or any? (dirties-on patch-ahead (2 + extraspc)) with [color = 8])
       [
         set possibilities lput heading possibilities
         ifelse extraspc = 0 [
@@ -290,20 +291,15 @@ to move-smartA [ ? ?1 ?2 ?3 ]
       set heading heading - 45
     ] ; verifies 8 neighbors
   ]
-  set counter length possibilities
-  let testnext possibilities
-  let counterB 0
-  while [ counter > 0 ][
-    set heading one-of testnext
-    ifelse member? heading [ 45 135 225 315 ] [ set counterB 3 ]
-    [set counterB 5]
-    let counterA 0
-    while [counterA < counterB]
-    []
-    set testnext remove-item (position heading testnext) testnext
-    set counter counter - 1
+  ifelse length possibilities = 0 [
+    ask cleaner ? [
+    set gave-up-at ticks
+    set unoperating unoperating + 1]
   ]
-  set ?1 actual-seq
+  [
+    ask cleaner ? [
+    set heading one-of possibilities]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -468,7 +464,7 @@ quant-cleaners
 quant-cleaners
 1
 round ((0.25 * count walls) - 1)
-5.0
+1.0
 1
 1
 cleaner(s)
@@ -483,7 +479,7 @@ dirty-quant
 dirty-quant
 33
 100
-63.0
+100.0
 1
 1
 %
@@ -509,7 +505,7 @@ Scores
 Ticks
 Clean spots
 0.0
-80.0
+400.0
 0.0
 80.0
 true
