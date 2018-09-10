@@ -6,10 +6,15 @@ vacuum-own [
   percmin-x
   percmax-y
   percmin-y
+  refposx
+  refposy
   curposx
   curposy
   score
   gave-up-at
+  count-possib
+  possib-whites
+  dir
 ]
 globals [
   stress-results
@@ -49,7 +54,7 @@ to setup-room
   ask patches [ set pcolor 9 ]
   setup-obstacles
   setup-dirties
-  setup-vacuum
+  setup-vacuum one-of valid-corx one-of valid-cory
 end
 
 to setup-obstacles
@@ -59,19 +64,30 @@ to setup-obstacles
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
 end
-
-to setup-vacuum
-  create-vacuum quant-cleaners [ setxy one-of valid-corx one-of valid-cory
-    set heading 90
-    set color ((who - 1) * 10) + 15
+to reset-vacuum
+  ask self [
+    set heading one-of [ 45 90 135 180 ]
+    set heading heading * one-of [ 1 -1 ]
+    set curposx 0
+    set curposy 0
     set percmax-x 0
     set percmin-x 0
     set percmax-y 0
     set percmin-y 0
-    set curposx 0
-    set curposy 0
     set score 0
     set gave-up-at 0
+    set refposx 0
+    set refposy 0
+    set count-possib 0
+    set dir one-of [ 1 -1 ]
+    set possib-whites [ ]
+  ]
+end
+to setup-vacuum [ ?1 ?2 ]
+  create-vacuum quant-cleaners [ setxy ?1 ?2
+    set heading 90
+    set color ((who - 1) * 10) + 15
+    reset-vacuum
     while [any? other walls-here or any? other vacuum-here]
     [ setxy one-of valid-corx one-of valid-cory ]
   ]
@@ -98,11 +114,7 @@ to re-run
   let counter 0
   while [ counter < quant-cleaners ] [ ask cleaner (counter + count walls + count dirties) [
     setxy (xcor - ( 2 * curposx )) (ycor - ( 2 * curposy ))
-    set heading 90
-    set curposx 0
-    set curposy 0
-    set score 0
-    set gave-up-at 0
+    reset-vacuum
     ]
     set counter counter + 1
   ]
@@ -123,7 +135,7 @@ end
 to go
   if not any? dirties with [color = 5] or ticks = 144000 or not any? vacuum or unoperating >= quant-cleaners
   [
-    watch item (quant-cleaners - 1) (sort-on [score] vacuum)
+    if count vacuum > 1 [      watch item (quant-cleaners - 1) (sort-on [score] vacuum)    ]
     stop
   ]
   tick
@@ -133,7 +145,7 @@ to go
     ask cleaner (counter + count walls + count dirties) [
       if (gave-up-at = 0)[
         ifelse ((score / ticks) < (0.25 * dirty-quant / 100))
-        and ticks >= 3 + round((2 * (percmax-x - percmin-x) * (percmax-y - percmin-y)) + handcap) and not any? dirties-here with [color = 5][
+        and ticks >= round((2 * (1 + percmax-x - percmin-x) * (1 + percmax-y - percmin-y)) + handcap) and not any? dirties-here with [color = 5][
           set gave-up-at ticks
           set unoperating unoperating + 1
         ]
@@ -141,33 +153,9 @@ to go
           ifelse any? dirties-here with [color = 5]
           [ get-dirty (counter + count walls + count dirties) ]
           [ ifelse smart-moves?
-            [move-smart (counter + count walls + count dirties) 1]
-            [move-random (counter + count walls + count dirties) 0]
-          ]
-        ]
-      ]
-    ]
-    set counter counter + 1
-  ]
-end
-
-to go-once
-  tick
-  let counter 0
-  while [ counter < quant-cleaners ]
-  [
-    ask cleaner (counter + count walls + count dirties) [
-      if (gave-up-at = 0)[
-        ifelse ((score / ticks) < (0.25 * dirty-quant / 100))
-        and (ticks >= (3 + round((2 * (percmax-x - percmin-x) * (percmax-y - percmin-y)) + handcap))) and not any? dirties-here with [color = 5][
-          set gave-up-at ticks
-          set unoperating unoperating + 1
-        ]
-        [
-          ifelse any? dirties-here with [color = 5]
-          [ get-dirty (counter + count walls + count dirties) ]
-          [ ifelse smart-moves?
-            [move-smart (counter + count walls + count dirties) 1]
+            [ ifelse intel-level > 0 and count-possib = 0 [move-smartA (counter + count walls + count dirties) ]
+              [move-smart (counter + count walls + count dirties) 1]
+            ]
             [move-random (counter + count walls + count dirties) 0]
           ]
         ]
@@ -189,6 +177,9 @@ to move-random [ ? ?1 ]
       and max-count < 4]
     [
       set heading heading - 45
+      set extraspc 0
+      if member? heading [ 45 315 225 135 ]
+      [ set extraspc 1 ]
       set max-count max-count + 1
     ]
     if max-count != 4 [
@@ -221,44 +212,50 @@ to move-random [ ? ?1 ]
   ]
 end
 
-to move-smart [ ? ?1 ]
+to move-smart [ ? ?1]
   ask cleaner ? [
     ifelse ?1 < 8[
       let extraspc 0
       if member? heading [ 45 315 225 135 ]
       [ set extraspc 1 ]
-      ifelse (any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
+      ifelse ((any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
         or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
           and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
-      or any? (dirties-on patch-ahead (2 + extraspc)) with [color = 8] or not any? turtles-on patch-ahead (2 + extraspc)
+      or any? (dirties-on patch-ahead (2 + extraspc)) with [color = 8] or not any? turtles-on patch-ahead (2 + extraspc))
+      or ((((extraspc = 0 and (curposx + round (sin heading) > refposx + sin heading and curposy + round (cos heading) > refposy + cos heading))
+        or (extraspc = 1 and (curposx + round (sin heading / sin 45) > refposx + round (sin heading / sin 45)
+          and curposy + round (cos heading / sin 45) > refposy + round (cos heading / sin 45))))) and count-possib > 0)
       [
-        set heading heading - 45
-        move-smart ? ?1 + 1
+        set heading heading - 45 * dir
+        move-smart ? (?1 + 1)
       ]
       [
         move-random ? 1
         if extraspc = 1 [
-          ifelse ?1 = 2 [set heading heading + 90]
+          ifelse ?1 = 2 [set heading heading + 90 ]
           [if ?1 = 3 [set heading heading + 180 ]]
+        ]
+        if count-possib != 0 [
+          set count-possib count-possib - 1
         ]
       ]
     ]
     [
-      move-random ? 0
+      ifelse intel-level > 0 [ set heading one-of possib-whites
+      move-random ? 1]
+      [move-random ? 0]
     ]
   ]
 end
 
-
-
-to move-smartA [ ? ?1 ]
+to move-smartA [ ? ]
   let counter 0
-  let possibilities [ ]
-
+  let hipposx 0
+  let hipposy 0
+  let possibW [ ]
+  let possib [ ]
   ask cleaner ? [
     while [ counter < 8 ] [
-      let hipposx curposx
-      let hipposy curposy
       let extraspc 0
       if member? heading [ 45 315 225 135 ]
       [ set extraspc 1 ]
@@ -266,40 +263,43 @@ to move-smartA [ ? ?1 ]
         or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
           and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
       [
-        set possibilities lput heading possibilities
-        ifelse extraspc = 0 [
-          set hipposx hipposx + round (sin heading)
-          set hipposy hipposy + round (cos heading)
-        ]
-        [
-          set hipposx hipposx + round (sin heading / sin 45)
-          set hipposy hipposy + round (cos heading / sin 45)
-        ]
-        ifelse hipposx > percmax-x
-        [ set percmax-x hipposx ]
-        [
-          if hipposx < percmin-x
-          [ set percmin-x hipposx ]
-        ]
-        ifelse hipposx > percmax-y
-        [ set percmax-y hipposx ]
-        [
-          if hipposx < percmin-y
-          [ set percmin-y hipposx ]
+        ifelse any? (dirties-on patch-ahead (2 + extraspc)) with [color = 8] [set possibW lput heading possibW]
+        [set possib lput heading possib
+          ifelse extraspc = 0 [
+            set hipposx curposx + round (sin heading)
+            set hipposy curposy + round (cos heading)
+          ]
+          [
+            set hipposx curposx + round (sin heading / sin 45)
+            set hipposy curposy + round (cos heading / sin 45)
+          ]
+          ifelse hipposx > percmax-x
+          [ set percmax-x hipposx ]
+          [
+            if hipposx < percmin-x
+            [ set percmin-x hipposx ]
+          ]
+          ifelse hipposy > percmax-y
+          [ set percmax-y hipposy ]
+          [
+            if hipposy < percmin-y
+            [ set percmin-y hipposy ]
+          ]
         ]
       ]
       set heading heading - 45
+      set counter counter + 1
     ] ; verifies 8 neighbors
+    if ((1 + percmax-x - percmin-x) * (1 + percmax-y - percmin-y)) = 1 and length possibW = 0[
+      set gave-up-at ticks
+      set unoperating unoperating + 1
+    ]
+    set count-possib length possib
+    set possib-whites possibW
+    set refposx curposx
+    set refposy curposy
   ]
-  ifelse length possibilities = 0 [
-    ask cleaner ? [
-    set gave-up-at ticks
-    set unoperating unoperating + 1]
-  ]
-  [
-    ask cleaner ? [
-    set heading one-of possibilities]
-  ]
+  move-smart ? 1
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -369,7 +369,7 @@ BUTTON
 200
 100
 go once
-go-once
+go
 NIL
 1
 T
@@ -382,9 +382,9 @@ NIL
 
 SLIDER
 14
-103
+102
 47
-263
+262
 zoom
 zoom
 25
@@ -397,9 +397,9 @@ VERTICAL
 
 SLIDER
 15
-296
+295
 187
-329
+328
 pxmax
 pxmax
 pxmin + 2
@@ -412,9 +412,9 @@ HORIZONTAL
 
 SLIDER
 15
-328
+327
 187
-361
+360
 pxmin
 pxmin
 -14
@@ -427,9 +427,9 @@ HORIZONTAL
 
 SLIDER
 15
-361
+360
 187
-394
+393
 pymax
 pymax
 pymin + 2
@@ -442,9 +442,9 @@ HORIZONTAL
 
 SLIDER
 15
-394
+393
 187
-427
+426
 pymin
 pymin
 -14
@@ -487,9 +487,9 @@ VERTICAL
 
 SWITCH
 25
-263
+262
 181
-296
+295
 smart-moves?
 smart-moves?
 0
@@ -547,9 +547,9 @@ MONITOR
 
 SLIDER
 47
-103
+102
 80
-263
+262
 handcap
 handcap
 -100
@@ -609,6 +609,21 @@ sum [score] of vacuum
 17
 1
 11
+
+SLIDER
+86
+102
+119
+263
+intel-level
+intel-level
+0
+1
+1.0
+1
+1
+NIL
+VERTICAL
 
 @#$#@#$#@
 ## WHAT IS IT?
