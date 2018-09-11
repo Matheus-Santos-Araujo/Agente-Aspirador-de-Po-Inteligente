@@ -169,12 +169,14 @@ to move-random [ ? ?1 ]
   ask cleaner ? [
     let max-count 0
     let extraspc 0
+    let check-dirties 0
     if member? heading [ 45 315 225 135 ]
     [ set extraspc 1 ]
     while [(any? walls-on patch-ahead (2 + extraspc) or any? vacuum-on patch-ahead (2 + extraspc)
       or not (member? ([pxcor] of patch-ahead (2 + extraspc)) valid-corx
         and member? ([pycor] of patch-ahead (2 + extraspc)) valid-cory))
-      and max-count < 4]
+      or (smart-moves? = false and intel-level = 1 and (not any? (dirties-on patch-ahead (2 + extraspc)) with [color = 5] and max-count < 8))
+     ]
     [
       set heading heading - 45
       set extraspc 0
@@ -189,7 +191,7 @@ to move-random [ ? ?1 ]
         set curposy curposy + round (cos heading)
       ]
       [
-        move-to patch-ahead 3
+        move-to patch-ahead (2 + extraspc)
         set curposx curposx + round (sin heading / sin 45)
         set curposy curposy + round (cos heading / sin 45)
       ]
@@ -492,7 +494,7 @@ SWITCH
 295
 smart-moves?
 smart-moves?
-0
+1
 1
 -1000
 
