@@ -243,7 +243,7 @@ to move-smart [ ? ?1]
       ]
     ]
     [
-      ifelse intel-level > 0 [ set heading one-of possib-whites
+      ifelse intel-level > 0 and length possib-whites != 0 [ set heading one-of possib-whites
       move-random ? 1]
       [move-random ? 0]
     ]
@@ -494,7 +494,7 @@ SWITCH
 295
 smart-moves?
 smart-moves?
-1
+0
 1
 -1000
 
